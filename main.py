@@ -103,6 +103,7 @@ def syphon(p1: str, p2: str, observers: list):
 
 	except Exception as e:
 		print("An exception occured: ", e)
+		syphon(p1, p2, observers)
 
 
 if __name__ == "__main__":
