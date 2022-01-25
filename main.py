@@ -113,7 +113,7 @@ if __name__ == "__main__":
 		fnmgr = FileStreamManager(prod1, prod2, 5)
 
 		syphon(prod1, prod2, observers=[
-			lambda x: print(x, end=""),
+			lambda x: print(f"[{x}]", end=""),
 			fnmgr.write_line,
 		])
 	else:
