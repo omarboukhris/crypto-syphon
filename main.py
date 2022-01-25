@@ -64,8 +64,11 @@ class FileStreamManager:
 			os.mkdir(self.current_week_folder)
 
 		self.current_week_day_file = os.path.join(self.current_week_folder, str(self.current_time.week_day))
-		self.fstream = open(self.current_week_day_file, "a")
 		print(f"Active file name updated: {self.current_week_day_file}")
+
+		if self.fstream is not None and not self.fstream.closed:
+			self.fstream.close()
+		self.fstream = open(self.current_week_day_file, "a")
 
 	def write_line(self, line: str):
 		self.fstream.write(line)
