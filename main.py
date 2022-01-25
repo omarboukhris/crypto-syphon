@@ -19,7 +19,7 @@ class DateTag:
 
 class FileStreamManager:
 
-	def __init__(self, p1: str, p2: str, check_frq: int):
+	def __init__(self, p1: str, p2: str, check_frq: int = 3600):
 
 		self.folder_name = f"{p1}{p2}"
 		if not os.path.isdir(self.folder_name):
@@ -69,6 +69,13 @@ class FileStreamManager:
 
 	def write_line(self, line: str):
 		self.fstream.write(line)
+		self.update_count()
+
+	def update_count(self):
+		self.count += 1
+		if self.count >= self.check_frq:
+			self.check_filename()
+			self.count = 0
 
 	def get_name(self):
 		return self.current_week_day_file
@@ -81,7 +88,6 @@ class FileStreamManager:
 
 
 def syphon(p1: str, p2: str, observers: list):
-
 	product = f"{p1}{p2}"
 	client = gemini.PublicClient()
 
@@ -101,20 +107,16 @@ def syphon(p1: str, p2: str, observers: list):
 
 if __name__ == "__main__":
 
-	if len(sys.argv) != 3:
+	if len(sys.argv) == 3:
+		prod1, prod2 = sys.argv[1:3]
+
+		fnmgr = FileStreamManager(prod1, prod2, 5)
+
+		syphon(prod1, prod2, observers=[
+			lambda x: print(x, end=""),
+			fnmgr.write_line,
+		])
+	else:
 		print("Not enough arguments")
 		print(f"usage : {sys.argv[0]} P1 P2, example: {sys.argv[0]} BTC USD")
-		exit()
-
-	prod1, prod2 = sys.argv[1:3]
-
-	fnmgr = FileStreamManager(prod1, prod2)
-
-	syphon(prod1, prod2, observers=[
-		lambda x: print(x, end=""),
-		fnmgr.write_line,
-	])
-
-
-
 
