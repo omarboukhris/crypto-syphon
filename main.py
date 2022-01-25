@@ -64,7 +64,7 @@ class FileStreamManager:
 			os.mkdir(self.current_week_folder)
 
 		self.current_week_day_file = os.path.join(self.current_week_folder, str(self.current_time.week_day))
-		self.fstream = open(self.current_week_day_file, "w")
+		self.fstream = open(self.current_week_day_file, "a")
 		print(f"Active file name updated: {self.current_week_day_file}")
 
 	def write_line(self, line: str):
@@ -89,22 +89,20 @@ class FileStreamManager:
 
 def syphon(p1: str, p2: str, observers: list):
 	product = f"{p1}{p2}"
+	client = gemini.PublicClient()
 
-	while True:
-		client = gemini.PublicClient()
+	try:
+		while True:
+			ticker = client.get_ticker(product)
+			line = f"{ticker['ask']}, {ticker['volume'][p1]}, {ticker['bid']}, {ticker['volume'][p2]}\n"
+			for obs in observers:
+				obs(line)
 
-		try:
-			while True:
-				ticker = client.get_ticker(product)
-				line = f"{ticker['ask']}, {ticker['volume'][p1]}, {ticker['bid']}, {ticker['volume'][p2]}\n"
-				for obs in observers:
-					obs(line)
+	except KeyboardInterrupt as _:
+		print("Syphon loop interrupted by user")
 
-		except KeyboardInterrupt as _:
-			print("Syphon loop interrupted by user")
-
-		except Exception as e:
-			print("An exception occured: ", e)
+	except Exception as e:
+		print("An exception occured: ", e)
 
 
 if __name__ == "__main__":
@@ -115,7 +113,7 @@ if __name__ == "__main__":
 		fnmgr = FileStreamManager(prod1, prod2, 5)
 
 		syphon(prod1, prod2, observers=[
-			lambda x: print(f"[{x}]", end=""),
+			lambda x: print(f"{x}", end=""),
 			fnmgr.write_line,
 		])
 	else:
